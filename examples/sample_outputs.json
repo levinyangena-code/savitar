@@ -1,0 +1,63 @@
+{
+  "find_related_ioc": {
+    "entity_id": "ioc:sha256:deadbeef",
+    "count": 8,
+    "results": [
+      {
+        "entity_id": "asset:web-prod-01",
+        "entity_type": "asset",
+        "depth": 1,
+        "confidence": 0.931,
+        "recency": 0.9983,
+        "impact": 1.0,
+        "final": 0.9279,
+        "evidence": [
+          {
+            "source": "observed_on-sensor",
+            "timestamp": "2026-10-23T10:48:00+00:00",
+            "rule_version": "rule-v1",
+            "model_version": "savitar-score-v1",
+            "confidence_hint": 0.99
+          }
+        ]
+      },
+      {
+        "entity_id": "vuln:CVE-2026-1001",
+        "entity_type": "vulnerability",
+        "depth": 2,
+        "confidence": 0.7634,
+        "recency": 0.9198,
+        "impact": 1.0,
+        "final": 0.7021
+      }
+    ]
+  },
+  "recurring_patterns_payments": {
+    "count": 3,
+    "patterns": [
+      {
+        "motif": "identity -- runs_on --> asset",
+        "occurrences": 3,
+        "precision": 0.75,
+        "business_units": ["payments"],
+        "example_pairs": [
+          ["id:svc-payments", "asset:web-prod-01"],
+          ["id:svc-payments", "asset:web-prod-02"],
+          ["id:alice", "asset:web-prod-01"]
+        ]
+      }
+    ]
+  },
+  "executive_summary": {
+    "count": 5,
+    "patterns": [
+      {
+        "motif": "identity -- runs_on --> asset",
+        "occurrences": 5,
+        "precision": 0.42,
+        "headline_score": 0.34,
+        "business_units": ["payments", "engineering", "hr"]
+      }
+    ]
+  }
+}
