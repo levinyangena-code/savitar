@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
@@ -64,15 +64,21 @@ def emit_lineage_record(
     return record
 
 
-def lineage_coverage_metrics(outputs: list[dict[str, Any]] | None = None) -> dict[str, float]:
-    total = len(outputs) if outputs is not None else len(_LINEAGE_STORE)
-    if total == 0:
+def lineage_coverage_metrics(outputs: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    items = list(outputs) if outputs is not None else _LINEAGE_STORE
+    if not items:
         return {"complete_lineage_pct": 0.0, "outputs_with_lineage": 0, "total_outputs": 0}
-    outputs_with_lineage = sum(1 for item in outputs or _LINEAGE_STORE if item.get("output_id") or True)
+    complete = 0
+    for item in items:
+        if isinstance(item, dict):
+            if item.get("lineage_record_id") or item.get("lineage_id") or item.get("output_id"):
+                complete += 1
+        elif isinstance(item, LineageRecord):
+            complete += 1
     return {
-        "complete_lineage_pct": round((outputs_with_lineage / total) * 100.0, 2),
-        "outputs_with_lineage": outputs_with_lineage,
-        "total_outputs": total,
+        "complete_lineage_pct": round((complete / len(items)) * 100.0, 2),
+        "outputs_with_lineage": complete,
+        "total_outputs": len(items),
     }
 
 

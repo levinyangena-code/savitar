@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-from .access import DEFAULT_POLICY_VERSION, VALID_ROLES, validate_purpose
+from .access import DEFAULT_POLICY_VERSION, validate_purpose
 
 
 @dataclass
@@ -33,7 +33,7 @@ class AuditEvent:
             "actor": self.actor,
             "action": self.action,
             "resource": self.resource,
-            "purpose": self purpose,
+            "purpose": self.purpose,
             "decision": self.decision,
             "outcome": self.outcome,
             "override_flag": self.override_flag,
@@ -53,7 +53,8 @@ class AuditStore:
         self.events: list[AuditEvent] = []
 
     def append(self, event: AuditEvent) -> AuditEvent:
-        if event.purpose and not validate_purpose(event.actor.split(":", 1)[0].lower(), event.purpose):
+        role = event.actor.split(":", 1)[0].lower().strip()
+        if event.purpose and not validate_purpose(role, event.purpose):
             raise AuditWriteError(f"purpose '{event.purpose}' invalid for actor '{event.actor}'")
         prev_hash = self.events[-1].hash if self.events else None
         event.prev_hash = prev_hash
@@ -68,24 +69,20 @@ class AuditStore:
             raise ValueError("page_size must be >= 1")
         items = list(self.events)
         if filters:
-            items = [
-                item for item in items
-                if all(getattr(item, key, None) == value for key, value in filters.items())
-            ]
+            items = [item for item in items if all(getattr(item, key, None) == value for key, value in filters.items())]
         start = (page - 1) * page_size
         end = start + page_size
         return items[start:end]
 
     def verify_chain(self) -> bool:
-        prev_hash = None
+        previous_hash = None
         for event in self.events:
-            expected_prev = prev_hash
-            if event.prev_hash != expected_prev:
+            if event.prev_hash != previous_hash:
                 return False
             recomputed = _compute_hash(event)
             if event.hash != recomputed:
                 return False
-            prev_hash = event.hash
+            previous_hash = event.hash
         return True
 
 
@@ -128,7 +125,8 @@ def append_audit_event(
 ) -> AuditEvent:
     if not actor or not resource:
         raise AuditWriteError("actor and resource are required")
-    if purpose and not validate_purpose(actor.lower(), purpose):
+    role = actor.split(":", 1)[0].lower().strip()
+    if purpose and not validate_purpose(role, purpose):
         raise AuditWriteError(f"purpose '{purpose}' invalid for actor '{actor}'")
     event = AuditEvent(
         id=event_id or f"audit-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}",
@@ -155,16 +153,14 @@ def verify_chain() -> bool:
     return _AUDIT_STORE.verify_chain()
 
 
-def audit_metrics() -> dict[str, float]:
+def audit_metrics() -> dict[str, float | int]:
     total = len(_AUDIT_STORE.events)
     if total == 0:
         return {"audited_access_pct": 0.0, "audit_write_latency_p95_ms": 0.0, "total_events": 0}
-    audited = total
     return {
         "audited_access_pct": 100.0,
         "audit_write_latency_p95_ms": 10.0,
         "total_events": total,
-        "audited_events": audited,
     }
 
 
