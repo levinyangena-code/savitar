@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "roles": {
+    "analyst": ["read"],
+    "ir_responder": ["read", "write"],
+    "executive": ["read"],
+    "auditor": ["read", "write"],
+    "admin": ["read", "write", "admin_write"]
+  }
+}
