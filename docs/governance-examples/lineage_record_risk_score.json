@@ -1,0 +1,21 @@
+{
+  "id": "lineage-risk-score-001",
+  "output_type": "risk_score",
+  "output_id": "risk:payments-web-01:2026-10-23",
+  "inputs": [
+    "cmdb:asset-101#sha256:...",
+    "ticketing:inc-777#sha256:...",
+    "vuln:CVE-2026-1001#sha256:..."
+  ],
+  "transformations": [
+    "entity_resolution",
+    "source_priority_merge",
+    "score_relationship"
+  ],
+  "model_versions": [
+    "savitar-score-v1",
+    "rule-v1"
+  ],
+  "timestamp": "2026-10-23T12:00:00Z",
+  "actor": "analyst"
+}

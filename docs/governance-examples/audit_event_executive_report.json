@@ -1,0 +1,16 @@
+{
+  "id": "audit-executive-report-001",
+  "timestamp": "2026-10-23T12:05:00Z",
+  "actor": "executive",
+  "action": "read",
+  "resource": "/v1/executive_summary",
+  "purpose": "executive_report",
+  "decision": "allow",
+  "outcome": "executive_summary_generated",
+  "override_flag": false,
+  "policy_version": "v1",
+  "prev_hash": null,
+  "hash": "sha256:example-replaced-by-runtime",
+  "reason": null,
+  "approver": null
+}
