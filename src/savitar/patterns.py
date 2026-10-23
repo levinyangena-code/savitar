@@ -82,11 +82,19 @@ def detect_recurring_patterns(
         possible = max(1, len(src_nodes) * len(dst_nodes))
         precision = min(1.0, len(edges) / possible)
         examples = [(e.src, e.dst) for e in edges[:5]]
-        bus = sorted({
-            graph.node(e.src).business_unit
-            for e in edges
-            if graph.node(e.src)
-        })
+        if scope:
+            bus = sorted({
+                graph.node(end).business_unit
+                for e in edges
+                for end in (e.src, e.dst)
+                if in_scope(end)
+            })
+        else:
+            bus = sorted({
+                graph.node(e.src).business_unit
+                for e in edges
+                if graph.node(e.src)
+            })
         patterns.append(Pattern(
             motif=motif,
             occurrences=len(edges),

@@ -132,7 +132,7 @@ def rank_by_decision_relevance(
         node = graph.node(nid)
         if not node:
             continue
-        evidences = [e.evidence for _, _, _ in _incident_evidence(graph, nid)]
+        evidences = [edge.evidence for edge, _, _ in _incident_evidence(graph, nid)]
         if not evidences:
             evidences = [Evidence(
                 source="self",
